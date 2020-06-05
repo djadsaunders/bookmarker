@@ -1,0 +1,23 @@
+{
+  "name": "bookmarker",
+  "version": "1.0.0",
+  "description": "Bookmark App",
+  "main": "index.js",
+  "author": "DS",
+  "license": "MIT",
+  "entry point": "server.js",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
+    "bootstrap": "^4.5.0",
+    "jquery": "^3.5.1",
+    "popper.js": "^1.16.1",
+    "vue": "^2.6.11"
+  },
+  "scripts": {
+    "jquery-js": "cp node_modules/jquery/dist/jquery.min.js javascript",
+    "popper-js": "cp node_modules/popper.js/dist/popper.min.js javascript",
+    "bootstrap-js": "cp node_modules/bootstrap/dist/js/bootstrap.min.js javascript",
+    "vue-js": "cp node_modules/vue/dist/vue.min.js javascript",
+    "bootstrap-css": "cp node_modules/bootstrap/dist/css/bootstrap.min.css css"
+  }
+}
