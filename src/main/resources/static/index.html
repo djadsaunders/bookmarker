@@ -92,7 +92,7 @@
 				event.target.select();
 			},
 		  	getBookmarks: function() {
-				$.get("http://localhost:8080/category", function(resp) {
+				$.get("/category", function(resp) {
 					vm.categories = resp;
 				});
 		  	},
@@ -107,11 +107,11 @@
 			// Cannot call functions so have to duplicate logic to re-retrieve items
 			// Also, there should be a better way to update the items without re-retrieving
 			updateBookmark: function() {
-				$.post("http://localhost:8080/bookmark/" + this.pendingBookmark.id,
+				$.post("/bookmark/" + this.pendingBookmark.id,
 					{ bookmarkName: this.pendingBookmark.name }, 
 					function(resp) {
 						vm.pendingBookmark = null;
-						$.get("http://localhost:8080/category", function(resp) {
+						$.get("/category", function(resp) {
 							vm.categories = resp;
 						});
 					}
@@ -119,10 +119,10 @@
 			},
 			deleteBookmark: function(id) {
 				$.ajax({
-					url: "http://localhost:8080/bookmark/" + id,
+					url: "/bookmark/" + id,
 					type: "DELETE",
 					success: function(resp) {
-						$.get("http://localhost:8080/category", function(resp) {
+						$.get("/category", function(resp) {
 							vm.categories = resp;
 						});						
 					}
