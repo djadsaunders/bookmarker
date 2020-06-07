@@ -31,7 +31,8 @@
 					<small id="bookmark-help" class="form-text text-muted">Change the name and click Add to create a new bookmark</small>
 				</div>
 				<div v-else>
-					<i class="fas fa-trash-alt" v-on:drop="drop" v-on:dragover="allowDrop"></i>
+					<i class="fas fa-trash-alt" ondrop="drop(event)" ondragover="allowDrop(event)"></i>
+					<i class="fas fa-edit"></i>
 				</div>
 
 			</div>
