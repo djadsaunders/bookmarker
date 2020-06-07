@@ -3,32 +3,17 @@
 <html>
 	<head>
 		<meta charset="utf-8"/>
+		<title>Bookmarker</title>
 
 		<!-- Bootstrap and JQuery -->
 		<script src="/javascript/jquery.min.js"></script>
 		<script src="/javascript/bootstrap.min.js"></script>
+		<script src="/javascript/vue.js"></script>
 		<link rel="stylesheet" href="/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="/css/all.css" />
 
 		<!-- Custom CSS -->
 		<link rel="stylesheet" href="/css/style.css" />
-
-		<!-- Move these functions to Vue VM? -->
-		<script>
-			function allowDrop(event) {
-				event.preventDefault();
-			}
-
-			function drag(event) {
-				event.dataTransfer.setData("text", event.target.id);
-			}
-
-			function drop(event) {
-				event.preventDefault();
-				var data = event.dataTransfer.getData("text");
-				vm.deleteBookmark(data);
-			}			
-		</script>
 	</head>
 
 	<body>
@@ -46,7 +31,7 @@
 					<small id="bookmark-help" class="form-text text-muted">Change the name and click Add to create a new bookmark</small>
 				</div>
 				<div v-else>
-					<i class="fas fa-trash-alt" ondrop="drop(event)" ondragover="allowDrop(event)"></i>
+					<i class="fas fa-trash-alt" v-on:drop="drop" v-on:dragover="allowDrop"></i>
 				</div>
 
 			</div>
@@ -74,62 +59,6 @@
 		
 	</body>
 
-	<script src="/javascript/vue.min.js"></script>
-
-	<script>
-		var vm = new Vue({
-		  el: '#content-div',
-		  data: {
-			categories: '',
-			pendingBookmark: ''
-		  },
-		  created: function() {
-			this.getPendingBookmark();
-			this.getBookmarks();
-		  },
-		  methods: {
-			bookmarkInputClicked: function(event) {
-				event.target.select();
-			},
-		  	getBookmarks: function() {
-				$.get("/category", function(resp) {
-					vm.categories = resp;
-				});
-		  	},
-		  	getPendingBookmark: function() {
-				$.get("http://localhost:8080/pending-bookmark", function(resp) {
-					if (resp != null) {
-						vm.pendingBookmark = resp;
-					}
-				});
-			},
-			// Problems with update/delete:
-			// Cannot call functions so have to duplicate logic to re-retrieve items
-			// Also, there should be a better way to update the items without re-retrieving
-			updateBookmark: function() {
-				$.post("/bookmark/" + this.pendingBookmark.id,
-					{ bookmarkName: this.pendingBookmark.name }, 
-					function(resp) {
-						vm.pendingBookmark = null;
-						$.get("/category", function(resp) {
-							vm.categories = resp;
-						});
-					}
-				)
-			},
-			deleteBookmark: function(id) {
-				$.ajax({
-					url: "/bookmark/" + id,
-					type: "DELETE",
-					success: function(resp) {
-						$.get("/category", function(resp) {
-							vm.categories = resp;
-						});						
-					}
-				});
-			}
-		  }
-		});
-	</script>
+	<script src="/javascript/custom-vue.js"></script>
 
 </html>
