@@ -21,18 +21,29 @@
 			
 			<div class="top-bar">
 
-				<div v-if="pendingBookmark">
+				<div v-if="editing">
 					<div class="bookmark-form">
-						<label for="bookmark-name-input">Add bookmark</label>
-						<input v-model="pendingBookmark.name" type="text" id="bookmark-name-input" name="bookmarkName"
-							v-on:click="bookmarkInputClicked" />
-						<button class="btn btn-primary" v-on:click="updateBookmark">Add</button>
+						<label for="bookmark-name-input">Name</label>
+						<input v-model="pendingBookmark.name" type="text" id="bookmark-name-input" name="bookmarkName" />
+						<label for="bookmark-category-input">Category</label>
+						<input v-model="pendingBookmark.name" type="text" id="bookmark-name-input" name="bookmarkName" />
+						<button class="btn btn-primary" v-on:click="updateBookmark">Ok</button>
 					</div>
-					<small id="bookmark-help" class="form-text text-muted">Change the name and click Add to create a new bookmark</small>
 				</div>
 				<div v-else>
-					<i class="fas fa-trash-alt" ondrop="drop(event)" ondragover="allowDrop(event)"></i>
-					<i class="fas fa-edit"></i>
+					<div v-if="pendingBookmark">
+						<div class="bookmark-form">
+							<label for="bookmark-name-input">Add bookmark</label>
+							<input v-model="pendingBookmark.name" type="text" id="bookmark-name-input" name="bookmarkName"
+								v-on:click="bookmarkInputClicked" />
+							<button class="btn btn-primary" v-on:click="updateBookmark">Add</button>
+						</div>
+						<small id="bookmark-help" class="form-text text-muted">Change the name and click Add to create a new bookmark</small>
+					</div>
+					<div v-else>
+						<i class="fas fa-trash-alt" v-on:drop="drop" v-on:dragover="allowDrop"></i>
+						<i class="fas fa-edit"></i>
+					</div>
 				</div>
 
 			</div>
