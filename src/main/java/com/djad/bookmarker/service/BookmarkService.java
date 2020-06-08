@@ -27,17 +27,12 @@ public class BookmarkService {
     private CategoryRepository categoryRepository;
 
     @Transactional
-    public Bookmark createPendingBookmark(String url) {
-        return this.createBookmark(url, null, true);
+    public Bookmark createPendingBookmark(String url, byte[] faviconImageBytes) {
+        return this.createBookmark(url, null, true, faviconImageBytes);
     }
 
     @Transactional
-    public Bookmark createBookmark(String name, String url) {
-        return this.createBookmark(url, name, false);
-    }
-
-    @Transactional
-    public Bookmark createBookmark(String url, String name, boolean pending) {
+    public Bookmark createBookmark(String url, String name, boolean pending, byte[] faviconBytes) {
         logger.debug("Create bookmark");
 
         // Look for bookmark first and return if already existing (based on URL)
@@ -46,8 +41,13 @@ public class BookmarkService {
             return existingBookmark.get();
         }
 
+        // Add to the default category, create if it doesn't exist
         Optional<Category> defaultCategory = categoryRepository.findByName(Category.DEFAULT_NAME);
-        return bookmarkRepository.save(new Bookmark(defaultCategory.get(), url, name, pending));
+        if (!defaultCategory.isPresent()) {
+            defaultCategory = Optional.of(new Category(Category.DEFAULT_NAME));
+        }
+        
+        return bookmarkRepository.save(new Bookmark(defaultCategory.get(), url, name, pending, faviconBytes));
     }
 
     @Transactional
@@ -67,10 +67,21 @@ public class BookmarkService {
     }
 
     @Transactional
-    public void updateBookmark(long id, String name) {
-        logger.debug("Convert pending bookmark to real");
+    public void updateBookmark(long id, String name, String categoryName) {
+        logger.debug("Update bookmark");
+
         Bookmark bookmark = bookmarkRepository.findById(id).get();
+        //Category oldCategory = bookmark.getCategory();
+
+        // May be updating with a new category in which case, add it
+        Optional<Category> category = categoryRepository.findByName(categoryName);
+        if (!category.isPresent()) {
+            category = Optional.of(new Category(categoryName));
+        }
+
+        // Update and save
         bookmark.setName(name);
+        bookmark.setCategory(category.get());
         bookmark.setPending(false);
         bookmarkRepository.save(bookmark);
     }

@@ -19,52 +19,80 @@
 	<body>
 		<div class="p-3" id="content-div">
 			
+			<!-- Top Bar, icons and edit area -->
+
 			<div class="top-bar">
 
-				<div v-if="editing">
-					<div class="bookmark-form">
+				<i class="fas fa-question help" v-on:click="toggleHelp"></i>
+				<div v-if="editingBookmark">
+					<div class="item-form">
 						<label for="bookmark-name-input">Name</label>
-						<input v-model="pendingBookmark.name" type="text" id="bookmark-name-input" name="bookmarkName" />
+						<input v-model="bookmarkToEdit.name" type="text" id="bookmark-name-input" name="bookmarkName"
+							v-on:click="inputClicked" />
 						<label for="bookmark-category-input">Category</label>
-						<input v-model="pendingBookmark.name" type="text" id="bookmark-name-input" name="bookmarkName" />
-						<button class="btn btn-primary" v-on:click="updateBookmark">Ok</button>
+						<input v-model="bookmarkToEdit.category" type="text" id="bookmark-category-input" name="bookmarkCategory"
+							v-on:click="inputClicked" />
+						<button class="btn btn-primary" v-on:click="addOrEditBookmark">Ok</button>
+					</div>
+					<div class="instructions" :class="[showHelp ? showClass : hideClass]">
+						<div><small class="text-muted">
+							Enter a name and category to add or edit this bookmark
+						</small></div>
 					</div>
 				</div>
 				<div v-else>
-					<div v-if="pendingBookmark">
-						<div class="bookmark-form">
-							<label for="bookmark-name-input">Add bookmark</label>
-							<input v-model="pendingBookmark.name" type="text" id="bookmark-name-input" name="bookmarkName"
-								v-on:click="bookmarkInputClicked" />
-							<button class="btn btn-primary" v-on:click="updateBookmark">Add</button>
+					<div v-if="editingCategory">
+						<div class="item-form">
+							<label for="category-name-input">Name</label>
+							<input v-model="categoryToEdit.name" type="text" id="category-name-input" name="bookmarkName"
+								v-on:click="inputClicked" />
+							<button class="btn btn-primary" v-on:click="editCategory">Ok</button>
 						</div>
-						<small id="bookmark-help" class="form-text text-muted">Change the name and click Add to create a new bookmark</small>
+						<div class="instructions" :class="[showHelp ? showClass : hideClass]">
+							<div><small class="text-muted">
+								Change the category name and hit Ok
+							</small></div>
+						</div>
 					</div>
 					<div v-else>
-						<i class="fas fa-trash-alt" v-on:drop="drop" v-on:dragover="allowDrop"></i>
-						<i class="fas fa-edit"></i>
+						<i class="fas fa-trash-alt" v-on:drop="dropForDelete" v-on:dragover="allowDrop"></i>
+						<i class="fas fa-edit" v-on:drop="dropForEdit" v-on:dragover="allowDrop"></i>
+						<!--i class="fas fa-plus" v-on:click="addBookmark"></i>-->
+
+						<div class="instructions" :class="[showHelp ? showClass : hideClass]">
+							<div><small class="text-muted">
+								To create a bookmark, drag 
+								<a href="javascript:(function(){location.href='http://localhost:8080/pending-bookmark/create?url=' + location.href;})()">
+									<span class="badge badge-primary">Save Bookmark</span>
+								</a> 
+								to your bookmarks bar. When you're on a page you want to bookmark, hit the button
+							</small></div>
+							<div><small class="text-muted">
+								Your bookmarks are shown below. Drag bookmarks or categories onto the icons above to edit or delete
+							</small></div>
+						</div>
 					</div>
 				</div>
 
 			</div>
 			<hr/>
 
+			<!-- Main panel showing bookmarks -->
+
 			<div class="main-div">
-				<span v-for="(category) in categories">
-					<i class="fas fa-folder"></i><span class="category-label">{{category.name}}</span>
-					<span v-if="category.bookmarks">
-						<span v-for="(bookmark) in category.bookmarks">
-							<br/>
+				<div v-for="(category) in categories" class="category-area">
+					<span v-if="category.bookmarks.length > 0">
+						<div class="category-label" draggable="true" v-on:dragstart="drag" v-bind:id="'category.' + category.id">
+							<i class="fas fa-folder"></i>{{category.name}}
+						</div>
+						<div v-for="(bookmark) in category.bookmarks">
 							<a v-bind:href="bookmark.url" class="bookmark-label" v-bind:title="bookmark.url"
-								draggable="true" v-on:dragstart="drag" v-bind:id="bookmark.id">
+								draggable="true" v-on:dragstart="drag" v-bind:id="'bookmark.' + bookmark.id">
 								<i class="fas fa-bookmark bookmark-icon"></i>{{bookmark.name}}
 							</a>
-						</span>
+						</div>
 					</span>
-					<span v-else>
-						No bookmarks
-					</span>
-				</span>
+				</div>
 			</div>
 
 		</div>

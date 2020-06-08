@@ -23,34 +23,29 @@ public class BookmarkController {
 
     Logger logger = LoggerFactory.getLogger(BookmarkController.class);
 
-    private BookmarkService service;
+    private BookmarkService bookmarkService;
 
     @Autowired
-    public BookmarkController(BookmarkService service) {
-        this.service = service;
-    }
-
-    @PostMapping
-    public void createBookmark(@RequestParam("name") String name, @RequestParam("url") String url) {
-        logger.debug("Create bookmark");
-        service.createBookmark(name, url);
+    public BookmarkController(BookmarkService bookmarkService) {
+        this.bookmarkService = bookmarkService;
     }
 
     @PostMapping("/{id}")
-    public void updateBookmark(@PathVariable long id, @RequestParam("bookmarkName") String name) {
-        logger.debug("Update bookmark");
-        service.updateBookmark(id, name);
+    public void updateBookmark(@PathVariable long id, @RequestParam("bookmarkName") String name,
+            @RequestParam("categoryName") String category) {
+        logger.debug("Update bookmark: name=" + name + ", category=" + category);
+        bookmarkService.updateBookmark(id, name, category);
     }
 
     @GetMapping
     public List<BookmarkDTO> listBookmarks() {
         logger.debug("List bookmarks");
-        return BookmarkDTOFactory.createBookmarkDTOs(service.getAllBookmarks());
+        return BookmarkDTOFactory.createBookmarkDTOs(bookmarkService.getAllBookmarks());
     }
 
     @DeleteMapping("/{id}")
     public void deleteBookmark(@PathVariable long id) {
         logger.debug("Delete bookmark");
-        service.deleteBookmark(id);
+        bookmarkService.deleteBookmark(id);
     }
 }

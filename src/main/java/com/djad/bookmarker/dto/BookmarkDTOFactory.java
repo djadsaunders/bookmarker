@@ -12,7 +12,9 @@ public class BookmarkDTOFactory {
         for (Bookmark bookmark : bookmarks) {
             // Don't include pending bookmarks
             if (!bookmark.isPending()) {
-                dtos.add(new BookmarkDTO(bookmark.getId(), bookmark.getName(), bookmark.getUrl()));
+                dtos.add(new BookmarkDTO(
+                    bookmark.getCategory().getName(), bookmark.getId(), bookmark.getName(), 
+                        bookmark.getUrl()));
             }
         }
         return dtos;

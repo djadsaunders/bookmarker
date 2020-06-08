@@ -1,5 +1,8 @@
 package com.djad.bookmarker.domain;
 
+import java.sql.Blob;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.sql.rowset.serial.SerialBlob;
 
 @Entity
 @Table(name="bookmark")
@@ -20,7 +24,7 @@ public class Bookmark {
     @Column(name="name")
     private String name;
 
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.PERSIST)
     private Category category;
 
     @Column(name="url")
@@ -29,10 +33,13 @@ public class Bookmark {
     @Column(name="pending")
     private boolean pending;
 
+    @Column(name="favicon")
+    private Blob favicon;
+
     public Bookmark() {
     }
 
-    public Bookmark(Category category, String url, String name, boolean pending) {
+    public Bookmark(Category category, String url, String name, boolean pending, byte[] faviconBytes) {
         if (name == null) {
             this.name = url;
         }
@@ -42,6 +49,11 @@ public class Bookmark {
         this.category = category;
         this.url = url;
         this.pending = pending;
+        try {
+            this.favicon = new SerialBlob(faviconBytes);
+        }
+        catch (Exception e) {
+        }
     }
 
     public String toString() {
@@ -90,5 +102,13 @@ public class Bookmark {
 
     public void setPending(boolean pending) {
         this.pending = pending;
+    }
+
+    public Blob getFavicon() {
+        return favicon;
+    }
+
+    public void setFavicon(Blob favicon) {
+        this.favicon = favicon;
     }
 }

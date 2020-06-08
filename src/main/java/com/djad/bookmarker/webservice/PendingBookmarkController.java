@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.djad.bookmarker.domain.Bookmark;
 import com.djad.bookmarker.dto.BookmarkDTO;
 import com.djad.bookmarker.service.BookmarkService;
+import com.djad.bookmarker.service.FaviconService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +22,20 @@ public class PendingBookmarkController {
 
     Logger logger = LoggerFactory.getLogger(PendingBookmarkController.class);
 
-    private BookmarkService service;
+    private BookmarkService bookmarkService;
+
+    private FaviconService faviconService;
 
     @Autowired
-    public PendingBookmarkController(BookmarkService service) {
-        this.service = service;
+    public PendingBookmarkController(BookmarkService bookmarkService, FaviconService faviconService) {
+        this.bookmarkService = bookmarkService;
+        this.faviconService = faviconService;
     }
 
     @GetMapping(value="/create")
     public RedirectView createBookmark(@RequestParam("url") String url) {
-        service.createPendingBookmark(url);
+        byte[] faviconImage = faviconService.getFaviconAsByteArray(url);        
+        bookmarkService.createPendingBookmark(url, faviconImage);
         return new RedirectView("/index.html");
     }
 
@@ -38,9 +43,11 @@ public class PendingBookmarkController {
     public Optional<BookmarkDTO> getPendingBookmark() {
         logger.debug("Get pending bookmark");
         BookmarkDTO dto = null;
-        Optional<Bookmark> bookmark = service.getPendingBookmark();
+        Optional<Bookmark> bookmark = bookmarkService.getPendingBookmark();
         if (bookmark.isPresent()) {
-            dto = new BookmarkDTO(bookmark.get().getId(), bookmark.get().getName(), bookmark.get().getUrl());
+            Bookmark bookmarkObj = bookmark.get();
+            dto = new BookmarkDTO(bookmarkObj.getCategory().getName(), bookmarkObj.getId(), 
+                bookmarkObj.getName(), bookmarkObj.getUrl());
         }
         return Optional.ofNullable(dto);
     }

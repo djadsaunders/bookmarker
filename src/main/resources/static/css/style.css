@@ -1,4 +1,4 @@
-.bookmark-form > * {
+.items-form > * {
     display: inline;
     margin: 5px 3px;
 }
@@ -11,10 +11,12 @@
 .category-label {
     font-size: large;
     font-weight: bold;
+    margin-top: 10px;
 }
 
 .bookmark-label {
     color: #333;
+    margin-left: 20px;
 }
 
 .top-bar i {
@@ -22,10 +24,31 @@
     margin-right: 5px;
 }
 
+.instructions {
+    margin-top: 0.50em;
+}
+
 .main-div i {
     margin-right: 10px;
 }
 
-.main-div .bookmark-icon {
-    margin-left: 20px;
+.no-bookmarks {
+    font-style: italic;
+    color: #777;
+}
+
+.category-area * {
+    cursor: pointer;
+}
+
+.help {
+    float:right;
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
 }

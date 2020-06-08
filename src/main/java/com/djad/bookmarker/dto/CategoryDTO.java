@@ -5,8 +5,10 @@ import java.util.List;
 public class CategoryDTO {
     private String name;
     private List<BookmarkDTO> bookmarks;
+    private long id;
 
-    public CategoryDTO(String name, List<BookmarkDTO> bookmarks) {
+    public CategoryDTO(long id, String name, List<BookmarkDTO> bookmarks) {
+        this.id = id;
         this.name = name;
         this.bookmarks = bookmarks;
     }
@@ -25,5 +27,13 @@ public class CategoryDTO {
 
     public void setBookmarks(List<BookmarkDTO> bookmarks) {
         this.bookmarks = bookmarks;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

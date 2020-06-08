@@ -2,65 +2,127 @@ var vm = new Vue({
     el: '#content-div',
     data: {
       categories: '',
-      pendingBookmark: '',
-      editing: false
+      bookmarkToEdit: '',
+      categoryToEdit: '',
+      editingBookmark: false,
+      editingCategory: false,
+      showHelp: true,
+      showClass: 'show',
+      hideClass: 'hide',
+      newBookmark: {
+          name: "New bookmark",
+          category: "Unfiled"
+      }
     },
     created: function() {
       this.getPendingBookmark();
       this.getBookmarks();
     },
     methods: {
-        bookmarkInputClicked: function(event) {
+        // Auto-select input when clicked 
+        inputClicked: function(event) {
           event.target.select();
         },
+        // Retrieve all bookmarks
         getBookmarks: function() {
           $.get("/category", function(resp) {
               vm.categories = resp;
           });
         },
+        // Get the pending bookmark if any and set to edit
         getPendingBookmark: function() {
-          $.get("http://localhost:8080/pending-bookmark", function(resp) {
-              if (resp != null) {
-                  vm.pendingBookmark = resp;
-              }
-          });
+            $.get("/pending-bookmark", function(resp) {
+                if (resp != null) {
+                    vm.bookmarkToEdit = resp;
+                    vm.editingBookmark = true;
+                }
+            });
         },
+        // Add or edit a bookmark
         // Problems with update/delete:
-        // Cannot call functions so have to duplicate logic to re-retrieve items
-        // Also, there should be a better way to update the items without re-retrieving
-        updateBookmark: function() {
-            $.post("/bookmark/" + this.pendingBookmark.id,
-                { bookmarkName: this.pendingBookmark.name }, 
+        // 1. Cannot call functions so have to duplicate logic to re-retrieve items
+        // 2. Also, there should be a better way to update the items without re-retrieving
+        addOrEditBookmark: function() {
+            $.post("/bookmark/" + this.bookmarkToEdit.id, { 
+                    bookmarkName: this.bookmarkToEdit.name,
+                    categoryName: this.bookmarkToEdit.category
+                }, 
                 function(resp) {
-                    vm.pendingBookmark = null;
+                    vm.bookmarkToEdit = '';
                     $.get("/category", function(resp) {
                         vm.categories = resp;
+                        vm.editingBookmark = false;
                     });
                 }
             )
         },
-        deleteBookmark: function(id) {
+        // Handle drag event
+        drag: function(event) {
+            event.dataTransfer.setData("draggedItemId", event.target.id);
+        },
+        allowDrop: function(event) {
+            event.preventDefault();
+        },
+        // Handle drop onto trash can
+        dropForDelete: function(event) {
+            event.preventDefault();
+            var itemType = event.dataTransfer.getData("draggedItemId").split(".")[0];
+            var itemId = event.dataTransfer.getData("draggedItemId").split(".")[1];
+            console.log("Deleting " + itemType + ", " + itemId);
             $.ajax({
-                url: "/bookmark/" + id,
+                url: "/" + itemType + "/" + itemId,
                 type: "DELETE",
-                success: function(resp) {
+                success: function(resp) {vm
                     $.get("/category", function(resp) {
                         vm.categories = resp;
                     });						
                 }
             });
         },
-        drag: function(event) {
-            event.dataTransfer.setData("draggedObject", event.target.id);
-        },
-        allowDrop: function(event) {
+        // Handle drop onto edit icon 
+        dropForEdit: function(event) {
             event.preventDefault();
+            var itemType = event.dataTransfer.getData("draggedItemId").split(".")[0];
+            var itemId = event.dataTransfer.getData("draggedItemId").split(".")[1];
+
+            if (itemType == "bookmark") {
+                this.categories.forEach(function(category) {
+                    category.bookmarks.forEach(function(bookmark) {
+                        if (bookmark.id == itemId) {
+                            vm.bookmarkToEdit = bookmark;
+                            vm.editingBookmark = true;
+                        }
+                    });
+                });
+            }
+            else {
+                vm.categoryToEdit = vm.categories.filter(category => category.id == itemId)[0];
+                vm.editingCategory = true;
+            }
         },
-        drop: function(event) {
-            event.preventDefault();
-            var data = event.dataTransfer.getData("draggedObject");
-            console.log(data);
-            this.deleteBookmark(data);
+        // Handler for submit of new bookmark form
+        addBookmark: function() {
+            console.log("Add called: not implemented yet");
+            //vm.bookmarkToEdit = vm.newBookmark;
+            //vm.editingBookmark = true;
+        },
+        // Edit category
+        editCategory: function() {
+            $.post("/category/" + this.categoryToEdit.id, { 
+                categoryName: this.categoryToEdit.name
+                }, 
+                function(resp) {
+                    vm.categoryToEdit = '';
+                    $.get("/category", function(resp) {
+                        vm.categories = resp;
+                        vm.editingCategory = false;
+                    });
+                }
+            )
+        },
+        // Toggle to show or hide help
+        toggleHelp: function() {
+            vm.showHelp = !vm.showHelp;
         }
     }
 });
