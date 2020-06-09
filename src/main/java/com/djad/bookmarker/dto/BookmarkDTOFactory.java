@@ -4,10 +4,14 @@ import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.djad.bookmarker.ApplicationException;
 import com.djad.bookmarker.domain.Bookmark;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BookmarkDTOFactory {
+
+    static Logger logger = LoggerFactory.getLogger(BookmarkDTOFactory.class);
 
     private static byte[] blobToByteArray(Blob blob) {
         byte[] result = null;
@@ -17,7 +21,7 @@ public class BookmarkDTOFactory {
             result = blob.getBytes(1, blobLength);
         }
         catch (Exception e) {
-            throw new ApplicationException("Failed to create byte[] for favicon", e);
+            logger.error("Failed to create byte[] for favicon", e);
         }
 
         return result;

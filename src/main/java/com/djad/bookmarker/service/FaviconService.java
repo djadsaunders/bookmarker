@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import com.djad.bookmarker.ApplicationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,7 @@ public class FaviconService {
 
         String urlString = URL_PREFIX + "?domain=" + bookmarkUrl;
 
-        byte[] result = {};
+        byte[] result = null;
 
         try {
             URL url = new URL(urlString);
@@ -41,9 +39,9 @@ public class FaviconService {
             in.close();
             result = out.toByteArray();            
         } 
-        catch (IOException e) {
+        catch (Exception e) {
             logger.error(e.getMessage());
-            throw new ApplicationException("Error reading image", e);
+            // Leave icon empty on error
         }
 
         return result;

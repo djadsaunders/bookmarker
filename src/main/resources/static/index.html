@@ -88,8 +88,13 @@
 						<div v-for="(bookmark) in category.bookmarks">
 							<a v-bind:href="bookmark.url" class="bookmark-label" v-bind:title="bookmark.url"
 								draggable="true" v-on:dragstart="drag" v-bind:id="'bookmark.' + bookmark.id">
-								<img class="favicon" :src="'data:image/png;base64,' + bookmark.favicon" />{{bookmark.name}}
-								<!--<i class="fas fa-bookmark bookmark-icon"></i>{{bookmark.name}}-->
+								<span v-if="bookmark.favicon">
+									<img class="bookmark-icon" :src="'data:image/png;base64,' + bookmark.favicon" />
+								</span>
+								<span v-else>
+									<i class="fas fa-bookmark bookmark-icon"></i>
+								</span>
+								{{bookmark.name}}
 							</a>
 						</div>
 					</span>

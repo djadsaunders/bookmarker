@@ -56,8 +56,9 @@ public class Bookmark {
         }
         
         // Create Blob for image from byte[]
+        // If array is empty, don't try
         try {
-            this.favicon = new SerialBlob(faviconBytes);
+            if (faviconBytes != null && faviconBytes.length > 0) this.favicon = new SerialBlob(faviconBytes);
         }
         catch (Exception e) {
             throw new ApplicationException("Failed to create Blob for favicon", e);
