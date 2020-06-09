@@ -62,7 +62,7 @@
 						<div class="instructions" :class="[showHelp ? showClass : hideClass]">
 							<div><small class="text-muted">
 								To create a bookmark, drag 
-								<a href="javascript:(function(){location.href='http://localhost:8080/pending-bookmark/create?url=' + location.href;})()">
+								<a :href="jsButton">
 									<span class="badge badge-primary">Save Bookmark</span>
 								</a> 
 								to your bookmarks bar. When you're on a page you want to bookmark, hit the button
@@ -88,7 +88,8 @@
 						<div v-for="(bookmark) in category.bookmarks">
 							<a v-bind:href="bookmark.url" class="bookmark-label" v-bind:title="bookmark.url"
 								draggable="true" v-on:dragstart="drag" v-bind:id="'bookmark.' + bookmark.id">
-								<i class="fas fa-bookmark bookmark-icon"></i>{{bookmark.name}}
+								<img class="favicon" :src="'data:image/png;base64,' + bookmark.favicon" />{{bookmark.name}}
+								<!--<i class="fas fa-bookmark bookmark-icon"></i>{{bookmark.name}}-->
 							</a>
 						</div>
 					</span>

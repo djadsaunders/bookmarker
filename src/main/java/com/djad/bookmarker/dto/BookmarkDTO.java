@@ -5,12 +5,14 @@ public class BookmarkDTO {
     String name;
     String url;
     long id;
+    byte[] favicon;
 
-    public BookmarkDTO(String category, long id, String name, String url) {
+    protected BookmarkDTO(String category, long id, String name, String url, byte[] favicon) {
         this.category = category;
         this.id = id;
         this.name = name;
         this.url = url;
+        this.favicon = favicon;
     }
 
     public String getName() {
@@ -43,5 +45,13 @@ public class BookmarkDTO {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public byte[] getFavicon() {
+        return favicon;
+    }
+
+    public void setFavicon(byte[] favicon) {
+        this.favicon = favicon;
     }
 }

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.djad.bookmarker.domain.Bookmark;
 import com.djad.bookmarker.dto.BookmarkDTO;
+import com.djad.bookmarker.dto.BookmarkDTOFactory;
 import com.djad.bookmarker.service.BookmarkService;
 import com.djad.bookmarker.service.FaviconService;
 
@@ -43,11 +44,10 @@ public class PendingBookmarkController {
     public Optional<BookmarkDTO> getPendingBookmark() {
         logger.debug("Get pending bookmark");
         BookmarkDTO dto = null;
-        Optional<Bookmark> bookmark = bookmarkService.getPendingBookmark();
-        if (bookmark.isPresent()) {
-            Bookmark bookmarkObj = bookmark.get();
-            dto = new BookmarkDTO(bookmarkObj.getCategory().getName(), bookmarkObj.getId(), 
-                bookmarkObj.getName(), bookmarkObj.getUrl());
+        Optional<Bookmark> bookmarkOptional = bookmarkService.getPendingBookmark();
+        if (bookmarkOptional.isPresent()) {
+            Bookmark bookmark = bookmarkOptional.get();
+            dto = BookmarkDTOFactory.createDTO(bookmark);
         }
         return Optional.ofNullable(dto);
     }

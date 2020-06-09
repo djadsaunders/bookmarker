@@ -40,7 +40,7 @@ public class BookmarkController {
     @GetMapping
     public List<BookmarkDTO> listBookmarks() {
         logger.debug("List bookmarks");
-        return BookmarkDTOFactory.createBookmarkDTOs(bookmarkService.getAllBookmarks());
+        return BookmarkDTOFactory.createDTOsFromList(bookmarkService.getAllBookmarks());
     }
 
     @DeleteMapping("/{id}")

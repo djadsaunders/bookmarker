@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.sql.rowset.serial.SerialBlob;
 
+import com.djad.bookmarker.ApplicationException;
+
 @Entity
 @Table(name="bookmark")
 public class Bookmark {
@@ -40,19 +42,25 @@ public class Bookmark {
     }
 
     public Bookmark(Category category, String url, String name, boolean pending, byte[] faviconBytes) {
+
+        this.category = category;
+        this.url = url;
+        this.pending = pending;
+
+        // If name isn't specified, use URL
         if (name == null) {
             this.name = url;
         }
         else {
             this.name = name;
         }
-        this.category = category;
-        this.url = url;
-        this.pending = pending;
+        
+        // Create Blob for image from byte[]
         try {
             this.favicon = new SerialBlob(faviconBytes);
         }
         catch (Exception e) {
+            throw new ApplicationException("Failed to create Blob for favicon", e);
         }
     }
 

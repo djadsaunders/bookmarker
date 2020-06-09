@@ -12,7 +12,9 @@ var vm = new Vue({
       newBookmark: {
           name: "New bookmark",
           category: "Unfiled"
-      }
+      },
+      jsButton: "javascript:(function(){location.href='http://" +
+        location.host + "/pending-bookmark/create?url=' + location.href;})()"
     },
     created: function() {
       this.getPendingBookmark();

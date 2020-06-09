@@ -44,7 +44,7 @@ public class CategoryController {
         List<Category> categories = service.getAllCategories();
         List<CategoryDTO> dtos = new ArrayList<>();
         for (Category category : categories) {
-            List<BookmarkDTO> bookmarks = BookmarkDTOFactory.createBookmarkDTOs(category.getBookmarks());
+            List<BookmarkDTO> bookmarks = BookmarkDTOFactory.createDTOsFromList(category.getBookmarks());
             dtos.add(new CategoryDTO(category.getId(), category.getName(), bookmarks));
         }
         

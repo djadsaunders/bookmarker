@@ -52,3 +52,7 @@
 .show {
     display: block;
 }
+
+.favicon {
+    margin-right: 10px;
+}
