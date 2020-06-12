@@ -6,7 +6,7 @@ var vm = new Vue({
       categoryToEdit: '',
       editingBookmark: false,
       editingCategory: false,
-      showHelp: true,
+      showHelp: false,
       showClass: 'show',
       hideClass: 'hide',
       newBookmark: {
@@ -62,7 +62,7 @@ var vm = new Vue({
         drag: function(event) {
             event.dataTransfer.setData("draggedItemId", event.target.id);
         },
-        allowDrop: function(event) {
+        preventDefault: function(event) {
             event.preventDefault();
         },
         // Handle drop onto trash can
@@ -102,12 +102,6 @@ var vm = new Vue({
                 vm.editingCategory = true;
             }
         },
-        // Handler for submit of new bookmark form
-        addBookmark: function() {
-            console.log("Add called: not implemented yet");
-            //vm.bookmarkToEdit = vm.newBookmark;
-            //vm.editingBookmark = true;
-        },
         // Edit category
         editCategory: function() {
             $.post("/category/" + this.categoryToEdit.id, { 
@@ -125,6 +119,10 @@ var vm = new Vue({
         // Toggle to show or hide help
         toggleHelp: function() {
             vm.showHelp = !vm.showHelp;
+        },
+        refreshPage: function() {
+            location.reload();
+            return false;
         }
     }
 });
