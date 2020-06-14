@@ -1,11 +1,7 @@
 package com.djad.bookmarker.webservice;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.djad.bookmarker.domain.Category;
-import com.djad.bookmarker.dto.BookmarkDTO;
-import com.djad.bookmarker.dto.BookmarkDTOFactory;
 import com.djad.bookmarker.dto.CategoryDTO;
 import com.djad.bookmarker.service.CategoryService;
 
@@ -41,14 +37,8 @@ public class CategoryController {
 
     @GetMapping
     public List<CategoryDTO> listCategories() {
-        List<Category> categories = service.getAllCategories();
-        List<CategoryDTO> dtos = new ArrayList<>();
-        for (Category category : categories) {
-            List<BookmarkDTO> bookmarks = BookmarkDTOFactory.createDTOsFromList(category.getBookmarks());
-            dtos.add(new CategoryDTO(category.getId(), category.getName(), bookmarks));
-        }
-        
-        return dtos;
+        logger.debug("List categories");
+        return service.getAllCategories();
     }
 
     @DeleteMapping("/{id}")

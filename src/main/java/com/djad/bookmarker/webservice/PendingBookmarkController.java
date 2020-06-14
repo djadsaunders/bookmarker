@@ -43,12 +43,6 @@ public class PendingBookmarkController {
     @GetMapping
     public Optional<BookmarkDTO> getPendingBookmark() {
         logger.debug("Get pending bookmark");
-        BookmarkDTO dto = null;
-        Optional<Bookmark> bookmarkOptional = bookmarkService.getPendingBookmark();
-        if (bookmarkOptional.isPresent()) {
-            Bookmark bookmark = bookmarkOptional.get();
-            dto = BookmarkDTOFactory.createDTO(bookmark);
-        }
-        return Optional.ofNullable(dto);
+        return bookmarkService.getPendingBookmark();
     }
 }

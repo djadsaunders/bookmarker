@@ -7,6 +7,8 @@ import javax.transaction.Transactional;
 
 import com.djad.bookmarker.domain.Bookmark;
 import com.djad.bookmarker.domain.Category;
+import com.djad.bookmarker.dto.BookmarkDTO;
+import com.djad.bookmarker.dto.BookmarkDTOFactory;
 import com.djad.bookmarker.repository.BookmarkRepository;
 import com.djad.bookmarker.repository.CategoryRepository;
 
@@ -27,18 +29,18 @@ public class BookmarkService {
     private CategoryRepository categoryRepository;
 
     @Transactional
-    public Bookmark createPendingBookmark(String url, byte[] faviconImageBytes) {
-        return this.createBookmark(url, null, true, faviconImageBytes);
+    public BookmarkDTO createPendingBookmark(String url, byte[] faviconBytes) {
+        return this.createBookmark(url, null, true, faviconBytes);
     }
 
     @Transactional
-    public Bookmark createBookmark(String url, String name, boolean pending, byte[] faviconBytes) {
+    public BookmarkDTO createBookmark(String url, String name, boolean pending, byte[] faviconBytes) {
         logger.debug("Create bookmark");
 
         // Look for bookmark first and return if already existing (based on URL)
         Optional<Bookmark> existingBookmark = bookmarkRepository.findByUrl(url);
         if (existingBookmark.isPresent()) {
-            return existingBookmark.get();
+            return BookmarkDTOFactory.createDTO(existingBookmark.get());
         }
 
         // Add to the default category, create if it doesn't exist
@@ -46,24 +48,28 @@ public class BookmarkService {
         if (!defaultCategory.isPresent()) {
             defaultCategory = Optional.of(new Category(Category.DEFAULT_NAME));
         }
-        
-        return bookmarkRepository.save(new Bookmark(defaultCategory.get(), url, name, pending, faviconBytes));
+
+        Bookmark bookmark = bookmarkRepository.save(new Bookmark(defaultCategory.get(), url, name, pending, faviconBytes));
+
+        return BookmarkDTOFactory.createDTO(bookmark);
     }
 
     @Transactional
-    public List<Bookmark> getAllBookmarks() {
+    public List<BookmarkDTO> getAllBookmarks() {
         logger.debug("Get all bookmarks");
-        return (List<Bookmark>)bookmarkRepository.findByPending(false);
+        List<Bookmark> bookmarks = bookmarkRepository.findByPending(false);
+        return BookmarkDTOFactory.createDTOsFromList(bookmarks);
     }
 
     @Transactional
-    public Optional<Bookmark> getPendingBookmark() {
+    public Optional<BookmarkDTO> getPendingBookmark() {
         logger.debug("Get pending bookmark");
         List<Bookmark> bookmarks = bookmarkRepository.findByPending(true);
         if (bookmarks.size() == 0) {
             return Optional.empty();
         }
-        return Optional.of(bookmarks.get(0));
+        
+        return Optional.of(BookmarkDTOFactory.createDTO(bookmarks.get(0)));
     }
 
     @Transactional

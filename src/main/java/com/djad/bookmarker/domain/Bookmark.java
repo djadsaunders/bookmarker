@@ -10,13 +10,19 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.sql.rowset.serial.SerialBlob;
 
 import com.djad.bookmarker.ApplicationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Entity
 @Table(name="bookmark")
 public class Bookmark {
+
+    static Logger logger = LoggerFactory.getLogger(Bookmark.class);
 
     @Id
     @Column(name="id")
@@ -43,6 +49,8 @@ public class Bookmark {
 
     public Bookmark(Category category, String url, String name, boolean pending, byte[] faviconBytes) {
 
+        logger.debug("Create Bookmark");
+
         this.category = category;
         this.url = url;
         this.pending = pending;
@@ -58,7 +66,12 @@ public class Bookmark {
         // Create Blob for image from byte[]
         // If array is empty, don't try
         try {
-            if (faviconBytes != null && faviconBytes.length > 0) this.favicon = new SerialBlob(faviconBytes);
+            if (faviconBytes != null && faviconBytes.length > 0) {
+                logger.debug("Favicon bytes: " + faviconBytes);
+                SerialBlob serialBlob = new SerialBlob(faviconBytes);
+                logger.debug("Favicon Blob:" + serialBlob);
+                this.favicon = serialBlob;
+            }
         }
         catch (Exception e) {
             throw new ApplicationException("Failed to create Blob for favicon", e);
