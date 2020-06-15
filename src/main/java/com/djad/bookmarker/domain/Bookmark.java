@@ -10,16 +10,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.sql.rowset.serial.SerialBlob;
 
 import com.djad.bookmarker.ApplicationException;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Entity
 @Table(name="bookmark")
+@FilterDef(name="userFilter", parameters=@ParamDef(name="userId", type="string"))
+@Filter(name="userFilter", condition=":userId=userid")
 public class Bookmark {
 
     static Logger logger = LoggerFactory.getLogger(Bookmark.class);
@@ -28,6 +32,9 @@ public class Bookmark {
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @Column(name="userid")
+    private String userId;
 
     @Column(name="name")
     private String name;
@@ -47,10 +54,11 @@ public class Bookmark {
     public Bookmark() {
     }
 
-    public Bookmark(Category category, String url, String name, boolean pending, byte[] faviconBytes) {
+    public Bookmark(String userId, Category category, String url, String name, boolean pending, byte[] faviconBytes) {
 
         logger.debug("Create Bookmark");
 
+        this.userId = userId;
         this.category = category;
         this.url = url;
         this.pending = pending;
@@ -132,5 +140,13 @@ public class Bookmark {
 
     public void setFavicon(Blob favicon) {
         this.favicon = favicon;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

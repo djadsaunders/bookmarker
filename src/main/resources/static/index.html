@@ -24,10 +24,9 @@
 			<div class="top-bar">
 
 				<span class="help">
-					<a :href="jsButton">
-						<span class="badge badge-primary" @click="preventDefault">Save Bookmark</span>
-					</a> 
-					<i class="fas fa-question" v-on:click="toggleHelp"></i>
+					<span class="text-muted username-text">User: {{currentUsername}}</span>
+					<i class="fas fa-sign-out-alt" @click="logout" title="Sign out"></i>
+					<i class="fas fa-question" @click="toggleHelp" title="Show help"></i>
 				</span>
 				<div v-if="editingBookmark">
 					<div class="item-form">
@@ -37,8 +36,10 @@
 						<label for="bookmark-category-input">Category</label>
 						<input v-model="bookmarkToEdit.category" type="text" id="bookmark-category-input" name="bookmarkCategory"
 							v-on:click="inputClicked" />
-						<button class="btn btn-primary" v-on:click="addOrEditBookmark">Ok</button>
-						<button class="btn btn-secondary" v-on:click="refreshPage">Cancel</button>
+						<span class="button-area">
+							<button class="btn btn-primary" @click="addOrEditBookmark">Ok</button>
+							<button class="btn btn-secondary" @click="refreshPage">Cancel</button>
+						</span>
 					</div>
 				</div>
 				<div v-else>
@@ -46,23 +47,25 @@
 						<div class="item-form">
 							<label for="category-name-input">Name</label>
 							<input v-model="categoryToEdit.name" type="text" id="category-name-input" name="bookmarkName"
-								v-on:click="inputClicked" />
-							<button class="btn btn-primary" v-on:click="editCategory">Ok</button>
-							<button class="btn btn-secondary" v-on:click="refreshPage">Cancel</button>
+								@click="inputClicked" />
+							<span class="button-area">
+								<button class="btn btn-primary" @click="editCategory">Ok</button>
+								<button class="btn btn-secondary" @click="refreshPage">Cancel</button>
+							</span>
 						</div>
 					</div>
 					<div v-else>
-						<i class="fas fa-trash-alt" v-on:drop="dropForDelete" v-on:dragover="preventDefault"></i>
-						<i class="fas fa-edit" v-on:drop="dropForEdit" v-on:dragover="preventDefault"></i>
+						<i class="fas fa-trash-alt" v-on:drop="dropForDelete" v-on:dragover="preventDefault" title="Drag bookmark or category here to delete"></i>
+						<i class="fas fa-edit" v-on:drop="dropForEdit" v-on:dragover="preventDefault" title="Drag bookmark or category here to edit"></i>
 
 						<div class="instructions" :class="[showHelp ? showClass : hideClass]">
-							<div><small class="text-muted">
-								<strong>Creating a bookmark</strong>
-								<p>Drag the "Save Bookmark" button above onto your bookmarks bar. 
-									Then when you're on a page you want to bookmark, click the button and give it a name and category</p>
+							<span class="text-muted">
+								<strong>How do I create a new bookmark?</strong>
+								<p>Drag <a :href="jsButton"><img src="/images/savebookmark.png" @click="preventDefault" alt="Save Bookmark"/></a> 
+									onto your bookmarks bar. Then when you're on a page you want to bookmark, click the button and give it a name and category</p>
 								<strong>Editing or deleting bookmarks and categories</strong>
 								<p>You can drag a category or bookmark onto the icons above to edit or delete</p>
-							</small></div>
+							</span>
 						</div>
 					</div>
 				</div>

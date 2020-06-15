@@ -11,8 +11,14 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+
 @Entity
 @Table(name="category")
+@FilterDef(name="userFilter", parameters=@ParamDef(name="userId", type="string"))
+@Filter(name="userFilter", condition=":userId=userid")
 public class Category {
 
     public static final String DEFAULT_NAME = "Unfiled";
@@ -21,6 +27,9 @@ public class Category {
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @Column(name="userid")
+    private String userId;
 
     @Column(name="name")
     private String name;
@@ -31,7 +40,8 @@ public class Category {
     public Category() {
     }
 
-    public Category(String name) {
+    public Category(String userId, String name) {
+        this.userId = userId;
         this.name = name;
     }
 
@@ -82,6 +92,14 @@ public class Category {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
 }

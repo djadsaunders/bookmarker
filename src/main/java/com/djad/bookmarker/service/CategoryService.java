@@ -17,15 +17,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CategoryService {
+public class CategoryService extends AbstractService {
 
-    Logger logger = LoggerFactory.getLogger(BookmarkService.class);
+    Logger logger = LoggerFactory.getLogger(CategoryService.class);
 
     @Autowired
     private CategoryRepository categoryRepository;
 
     @Transactional
     public List<CategoryDTO> getAllCategories() {
+        logger.debug("Get all categories");
+
+        this.setUserFilter();
+
         List<Category> categories = (List<Category>)categoryRepository.findAll();  
         List<CategoryDTO> dtos = new ArrayList<>();
         for (Category category : categories) {

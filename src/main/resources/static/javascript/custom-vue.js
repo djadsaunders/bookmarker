@@ -14,11 +14,13 @@ var vm = new Vue({
           category: "Unfiled"
       },
       jsButton: "javascript:(function(){location.href='http://" +
-        location.host + "/pending-bookmark/create?url=' + location.href;})()"
+        location.host + "/pending-bookmark/create?url=' + location.href;})()",
+      currentUsername: "none"
     },
     created: function() {
       this.getPendingBookmark();
       this.getBookmarks();
+      this.getCurrentUsername();
     },
     methods: {
         // Auto-select input when clicked 
@@ -123,6 +125,15 @@ var vm = new Vue({
         refreshPage: function() {
             location.reload();
             return false;
+        },
+        logout: function() {
+            location.href="/logout";
+            return false;
+        },
+        getCurrentUsername: function() {
+            $.get("/userinfo", function(resp) {
+                vm.currentUsername = resp;
+            });
         }
     }
 });

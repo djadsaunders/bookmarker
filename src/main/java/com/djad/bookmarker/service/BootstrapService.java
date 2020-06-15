@@ -13,6 +13,7 @@ public class BootstrapService {
     public CategoryRepository categoryRepository;
 
     public void seedData() {
-        categoryRepository.save(new Category(Category.DEFAULT_NAME));
+        categoryRepository.save(new Category("dan", Category.DEFAULT_NAME));
+        categoryRepository.save(new Category("ali", Category.DEFAULT_NAME));
     }
 }

@@ -1,0 +1,393 @@
+diff --git a/pom.xml b/pom.xml
+index a9f6155..54fa701 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -31,7 +31,10 @@
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-web</artifactId>
+ 		</dependency>
+-
++		<dependency>
++			<groupId>org.springframework.boot</groupId>
++			<artifactId>spring-boot-starter-security</artifactId>
++		</dependency>
+ 		<dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-devtools</artifactId>
+diff --git a/src/main/java/com/djad/bookmarker/domain/Bookmark.java b/src/main/java/com/djad/bookmarker/domain/Bookmark.java
+index 82f8ccc..720b342 100644
+--- a/src/main/java/com/djad/bookmarker/domain/Bookmark.java
++++ b/src/main/java/com/djad/bookmarker/domain/Bookmark.java
+@@ -44,13 +44,17 @@ public class Bookmark {
+     @Column(name="favicon")
+     private Blob favicon;
+ 
++    @Column(name="userid")
++    private String userId;
++
+     public Bookmark() {
+     }
+ 
+-    public Bookmark(Category category, String url, String name, boolean pending, byte[] faviconBytes) {
++    public Bookmark(String userId, Category category, String url, String name, boolean pending, byte[] faviconBytes) {
+ 
+         logger.debug("Create Bookmark");
+ 
++        this.userId = userId;
+         this.category = category;
+         this.url = url;
+         this.pending = pending;
+@@ -133,4 +137,12 @@ public class Bookmark {
+     public void setFavicon(Blob favicon) {
+         this.favicon = favicon;
+     }
++
++    public String getUserId() {
++        return userId;
++    }
++
++    public void setUserId(String userId) {
++        this.userId = userId;
++    }
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/djad/bookmarker/domain/Category.java b/src/main/java/com/djad/bookmarker/domain/Category.java
+index a57c4f7..06e708a 100644
+--- a/src/main/java/com/djad/bookmarker/domain/Category.java
++++ b/src/main/java/com/djad/bookmarker/domain/Category.java
+@@ -28,10 +28,14 @@ public class Category {
+     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+     private List<Bookmark> bookmarks;
+ 
++    @Column(name="userid")
++    private String userId;
++
+     public Category() {
+     }
+ 
+-    public Category(String name) {
++    public Category(String userId, String name) {
++        this.userId = userId;
+         this.name = name;
+     }
+ 
+@@ -84,4 +88,12 @@ public class Category {
+         this.id = id;
+     }
+ 
++    public String getUserId() {
++        return userId;
++    }
++
++    public void setUserId(String userId) {
++        this.userId = userId;
++    }
++
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/djad/bookmarker/service/BookmarkService.java b/src/main/java/com/djad/bookmarker/service/BookmarkService.java
+index 6969156..b967c3a 100644
+--- a/src/main/java/com/djad/bookmarker/service/BookmarkService.java
++++ b/src/main/java/com/djad/bookmarker/service/BookmarkService.java
+@@ -29,12 +29,12 @@ public class BookmarkService {
+     private CategoryRepository categoryRepository;
+ 
+     @Transactional
+-    public BookmarkDTO createPendingBookmark(String url, byte[] faviconBytes) {
+-        return this.createBookmark(url, null, true, faviconBytes);
++    public BookmarkDTO createPendingBookmark(String userId, String url, byte[] faviconBytes) {
++        return this.createBookmark(userId, url, null, true, faviconBytes);
+     }
+ 
+     @Transactional
+-    public BookmarkDTO createBookmark(String url, String name, boolean pending, byte[] faviconBytes) {
++    public BookmarkDTO createBookmark(String userId, String url, String name, boolean pending, byte[] faviconBytes) {
+         logger.debug("Create bookmark");
+ 
+         // Look for bookmark first and return if already existing (based on URL)
+@@ -46,23 +46,24 @@ public class BookmarkService {
+         // Add to the default category, create if it doesn't exist
+         Optional<Category> defaultCategory = categoryRepository.findByName(Category.DEFAULT_NAME);
+         if (!defaultCategory.isPresent()) {
+-            defaultCategory = Optional.of(new Category(Category.DEFAULT_NAME));
++            defaultCategory = Optional.of(new Category(userId, Category.DEFAULT_NAME));
+         }
+ 
+-        Bookmark bookmark = bookmarkRepository.save(new Bookmark(defaultCategory.get(), url, name, pending, faviconBytes));
++        Bookmark bookmark = bookmarkRepository.save(
++            new Bookmark(userId, defaultCategory.get(), url, name, pending, faviconBytes));
+ 
+         return BookmarkDTOFactory.createDTO(bookmark);
+     }
+ 
+     @Transactional
+-    public List<BookmarkDTO> getAllBookmarks() {
++    public List<BookmarkDTO> getAllBookmarks(String userId) {
+         logger.debug("Get all bookmarks");
+         List<Bookmark> bookmarks = bookmarkRepository.findByPending(false);
+         return BookmarkDTOFactory.createDTOsFromList(bookmarks);
+     }
+ 
+     @Transactional
+-    public Optional<BookmarkDTO> getPendingBookmark() {
++    public Optional<BookmarkDTO> getPendingBookmark(String userId) {
+         logger.debug("Get pending bookmark");
+         List<Bookmark> bookmarks = bookmarkRepository.findByPending(true);
+         if (bookmarks.size() == 0) {
+@@ -82,7 +83,7 @@ public class BookmarkService {
+         // May be updating with a new category in which case, add it
+         Optional<Category> category = categoryRepository.findByName(categoryName);
+         if (!category.isPresent()) {
+-            category = Optional.of(new Category(categoryName));
++            category = Optional.of(new Category(bookmark.getUserId(), categoryName));
+         }
+ 
+         // Update and save
+diff --git a/src/main/java/com/djad/bookmarker/service/BootstrapService.java b/src/main/java/com/djad/bookmarker/service/BootstrapService.java
+index e868422..3556cbe 100644
+--- a/src/main/java/com/djad/bookmarker/service/BootstrapService.java
++++ b/src/main/java/com/djad/bookmarker/service/BootstrapService.java
+@@ -13,6 +13,7 @@ public class BootstrapService {
+     public CategoryRepository categoryRepository;
+ 
+     public void seedData() {
+-        categoryRepository.save(new Category(Category.DEFAULT_NAME));
++        categoryRepository.save(new Category("dan", Category.DEFAULT_NAME));
++        categoryRepository.save(new Category("ali", Category.DEFAULT_NAME));
+     }
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/djad/bookmarker/service/CategoryService.java b/src/main/java/com/djad/bookmarker/service/CategoryService.java
+index eca1153..f946262 100644
+--- a/src/main/java/com/djad/bookmarker/service/CategoryService.java
++++ b/src/main/java/com/djad/bookmarker/service/CategoryService.java
+@@ -25,7 +25,7 @@ public class CategoryService {
+     private CategoryRepository categoryRepository;
+ 
+     @Transactional
+-    public List<CategoryDTO> getAllCategories() {
++    public List<CategoryDTO> getAllCategories(String userId) {
+         List<Category> categories = (List<Category>)categoryRepository.findAll();  
+         List<CategoryDTO> dtos = new ArrayList<>();
+         for (Category category : categories) {
+diff --git a/src/main/java/com/djad/bookmarker/webservice/BookmarkController.java b/src/main/java/com/djad/bookmarker/webservice/BookmarkController.java
+index db762c3..8a99965 100644
+--- a/src/main/java/com/djad/bookmarker/webservice/BookmarkController.java
++++ b/src/main/java/com/djad/bookmarker/webservice/BookmarkController.java
+@@ -4,6 +4,7 @@ import java.util.List;
+ 
+ import com.djad.bookmarker.dto.BookmarkDTO;
+ import com.djad.bookmarker.service.BookmarkService;
++import com.djad.bookmarker.service.UserInfoService;
+ 
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -23,10 +24,12 @@ public class BookmarkController {
+     Logger logger = LoggerFactory.getLogger(BookmarkController.class);
+ 
+     private BookmarkService bookmarkService;
++    private UserInfoService userInfoService;
+ 
+     @Autowired
+-    public BookmarkController(BookmarkService bookmarkService) {
++    public BookmarkController(BookmarkService bookmarkService, UserInfoService userInfoService) {
+         this.bookmarkService = bookmarkService;
++        this.userInfoService = userInfoService;
+     }
+ 
+     @PostMapping("/{id}")
+@@ -39,8 +42,7 @@ public class BookmarkController {
+     @GetMapping
+     public List<BookmarkDTO> listBookmarks() {
+         logger.debug("List bookmarks");
+-        return bookmarkService.getAllBookmarks();
+-        //return BookmarkDTOFactory.createDTOsFromList(bookmarkService.getAllBookmarks());
++        return bookmarkService.getAllBookmarks(userInfoService.getCurrentUsername());
+     }
+ 
+     @DeleteMapping("/{id}")
+diff --git a/src/main/java/com/djad/bookmarker/webservice/CategoryController.java b/src/main/java/com/djad/bookmarker/webservice/CategoryController.java
+index 2957ca9..004fc08 100644
+--- a/src/main/java/com/djad/bookmarker/webservice/CategoryController.java
++++ b/src/main/java/com/djad/bookmarker/webservice/CategoryController.java
+@@ -4,6 +4,7 @@ import java.util.List;
+ 
+ import com.djad.bookmarker.dto.CategoryDTO;
+ import com.djad.bookmarker.service.CategoryService;
++import com.djad.bookmarker.service.UserInfoService;
+ 
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -22,28 +23,30 @@ public class CategoryController {
+ 
+     Logger logger = LoggerFactory.getLogger(BookmarkController.class);
+ 
+-    private CategoryService service;
++    private CategoryService categoryService;
++    private UserInfoService userInfoService;
+ 
+     @Autowired
+-    public CategoryController(CategoryService service) {
+-        this.service = service;
++    public CategoryController(CategoryService categoryService, UserInfoService userInfoService) {
++        this.categoryService = categoryService;
++        this.userInfoService = userInfoService;
+     }
+ 
+     @PostMapping("/{id}")
+     public void updateCategory(@PathVariable long id, @RequestParam("categoryName") String name) {
+         logger.debug("Update category: name=" + name);
+-        service.updateCategory(id, name);
++        categoryService.updateCategory(id, name);
+     }
+ 
+     @GetMapping
+     public List<CategoryDTO> listCategories() {
+         logger.debug("List categories");
+-        return service.getAllCategories();
++        return categoryService.getAllCategories(userInfoService.getCurrentUsername());
+     }
+ 
+     @DeleteMapping("/{id}")
+     public void deleteCategory(@PathVariable long id) {
+         logger.debug("Delete category");
+-        service.deleteCategory(id);
++        categoryService.deleteCategory(id);
+     }
+ }
+diff --git a/src/main/java/com/djad/bookmarker/webservice/PendingBookmarkController.java b/src/main/java/com/djad/bookmarker/webservice/PendingBookmarkController.java
+index fa1ec8c..c203948 100644
+--- a/src/main/java/com/djad/bookmarker/webservice/PendingBookmarkController.java
++++ b/src/main/java/com/djad/bookmarker/webservice/PendingBookmarkController.java
+@@ -7,6 +7,7 @@ import com.djad.bookmarker.dto.BookmarkDTO;
+ import com.djad.bookmarker.dto.BookmarkDTOFactory;
+ import com.djad.bookmarker.service.BookmarkService;
+ import com.djad.bookmarker.service.FaviconService;
++import com.djad.bookmarker.service.UserInfoService;
+ 
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -25,24 +26,28 @@ public class PendingBookmarkController {
+ 
+     private BookmarkService bookmarkService;
+ 
++    private UserInfoService userInfoService;
++
+     private FaviconService faviconService;
+ 
+     @Autowired
+-    public PendingBookmarkController(BookmarkService bookmarkService, FaviconService faviconService) {
+-        this.bookmarkService = bookmarkService;
+-        this.faviconService = faviconService;
++    public PendingBookmarkController(BookmarkService bookmarkService, FaviconService faviconService,
++        UserInfoService userInfoService) {
++            this.bookmarkService = bookmarkService;
++            this.faviconService = faviconService;
++            this.userInfoService = userInfoService;
+     }
+ 
+     @GetMapping(value="/create")
+     public RedirectView createBookmark(@RequestParam("url") String url) {
+         byte[] faviconImage = faviconService.getFaviconAsByteArray(url);        
+-        bookmarkService.createPendingBookmark(url, faviconImage);
++        bookmarkService.createPendingBookmark(userInfoService.getCurrentUsername(), url, faviconImage);
+         return new RedirectView("/index.html");
+     }
+ 
+     @GetMapping
+     public Optional<BookmarkDTO> getPendingBookmark() {
+         logger.debug("Get pending bookmark");
+-        return bookmarkService.getPendingBookmark();
++        return bookmarkService.getPendingBookmark(userInfoService.getCurrentUsername());
+     }
+ }
+diff --git a/src/main/resources/static/css/style.css b/src/main/resources/static/css/style.css
+index a39e0e2..4a34af9 100644
+--- a/src/main/resources/static/css/style.css
++++ b/src/main/resources/static/css/style.css
+@@ -45,7 +45,6 @@ body {
+ 
+ .help {
+     float:right;
+-    cursor: pointer;
+ }
+ 
+ .hide {
+@@ -65,5 +64,6 @@ body {
+ }
+ 
+ .help i {
++    cursor: pointer;
+     margin-left: 10px;
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/static/index.html b/src/main/resources/static/index.html
+index 5404be2..e34f990 100644
+--- a/src/main/resources/static/index.html
++++ b/src/main/resources/static/index.html
+@@ -24,9 +24,8 @@
+ 			<div class="top-bar">
+ 
+ 				<span class="help">
+-					<a :href="jsButton">
+-						<span class="badge badge-primary" @click="preventDefault">Save Bookmark</span>
+-					</a> 
++					<span class="text-muted">User: <span>{{currentUsername}}</span></span>
++					<i class="fas fa-sign-out-alt" @click="logout"></i>
+ 					<i class="fas fa-question" v-on:click="toggleHelp"></i>
+ 				</span>
+ 				<div v-if="editingBookmark">
+@@ -56,13 +55,13 @@
+ 						<i class="fas fa-edit" v-on:drop="dropForEdit" v-on:dragover="preventDefault"></i>
+ 
+ 						<div class="instructions" :class="[showHelp ? showClass : hideClass]">
+-							<div><small class="text-muted">
+-								<strong>Creating a bookmark</strong>
+-								<p>Drag the "Save Bookmark" button above onto your bookmarks bar. 
+-									Then when you're on a page you want to bookmark, click the button and give it a name and category</p>
++							<span class="text-muted">
++								<strong>How do I create a new bookmark?</strong>
++								<p>Drag <a :href="jsButton"><img src="/images/savebookmark.png" @click="preventDefault" alt="Save Bookmark"/></a> 
++									onto your bookmarks bar. Then when you're on a page you want to bookmark, click the button and give it a name and category</p>
+ 								<strong>Editing or deleting bookmarks and categories</strong>
+ 								<p>You can drag a category or bookmark onto the icons above to edit or delete</p>
+-							</small></div>
++							</span>
+ 						</div>
+ 					</div>
+ 				</div>
+diff --git a/src/main/resources/static/javascript/custom-vue.js b/src/main/resources/static/javascript/custom-vue.js
+index 75c842a..5ac985a 100644
+--- a/src/main/resources/static/javascript/custom-vue.js
++++ b/src/main/resources/static/javascript/custom-vue.js
+@@ -14,11 +14,13 @@ var vm = new Vue({
+           category: "Unfiled"
+       },
+       jsButton: "javascript:(function(){location.href='http://" +
+-        location.host + "/pending-bookmark/create?url=' + location.href;})()"
++        location.host + "/pending-bookmark/create?url=' + location.href;})()",
++      currentUsername: "none"
+     },
+     created: function() {
+       this.getPendingBookmark();
+       this.getBookmarks();
++      this.getCurrentUsername();
+     },
+     methods: {
+         // Auto-select input when clicked 
+@@ -123,6 +125,15 @@ var vm = new Vue({
+         refreshPage: function() {
+             location.reload();
+             return false;
++        },
++        logout: function() {
++            location.href="/logout";
++            return false;
++        },
++        getCurrentUsername: function() {
++            $.get("/userinfo", function(resp) {
++                vm.currentUsername = resp;
++            });
+         }
+     }
+ });

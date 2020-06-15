@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BookmarkService {
+public class BookmarkService extends AbstractService {
 
     Logger logger = LoggerFactory.getLogger(BookmarkService.class);
 
@@ -29,27 +29,23 @@ public class BookmarkService {
     private CategoryRepository categoryRepository;
 
     @Transactional
-    public BookmarkDTO createPendingBookmark(String url, byte[] faviconBytes) {
-        return this.createBookmark(url, null, true, faviconBytes);
-    }
-
-    @Transactional
-    public BookmarkDTO createBookmark(String url, String name, boolean pending, byte[] faviconBytes) {
+    public BookmarkDTO createBookmark(String userId, String url, byte[] faviconBytes) {
         logger.debug("Create bookmark");
 
         // Look for bookmark first and return if already existing (based on URL)
-        Optional<Bookmark> existingBookmark = bookmarkRepository.findByUrl(url);
+        Optional<Bookmark> existingBookmark = bookmarkRepository.findByUrlAndUserId(url, userId);
         if (existingBookmark.isPresent()) {
             return BookmarkDTOFactory.createDTO(existingBookmark.get());
         }
 
         // Add to the default category, create if it doesn't exist
-        Optional<Category> defaultCategory = categoryRepository.findByName(Category.DEFAULT_NAME);
+        Optional<Category> defaultCategory = categoryRepository.findByNameAndUserId(Category.DEFAULT_NAME, userId);
         if (!defaultCategory.isPresent()) {
-            defaultCategory = Optional.of(new Category(Category.DEFAULT_NAME));
+            defaultCategory = Optional.of(new Category(userId, Category.DEFAULT_NAME));
         }
 
-        Bookmark bookmark = bookmarkRepository.save(new Bookmark(defaultCategory.get(), url, name, pending, faviconBytes));
+        Bookmark bookmark = bookmarkRepository.save(
+            new Bookmark(userId, defaultCategory.get(), url, null, true, faviconBytes));
 
         return BookmarkDTOFactory.createDTO(bookmark);
     }
@@ -57,14 +53,20 @@ public class BookmarkService {
     @Transactional
     public List<BookmarkDTO> getAllBookmarks() {
         logger.debug("Get all bookmarks");
-        List<Bookmark> bookmarks = bookmarkRepository.findByPending(false);
+
+        this.setUserFilter();
+
+        List<Bookmark> bookmarks = bookmarkRepository.findByPendingAndUserId(false, this.getCurrentUserName());
         return BookmarkDTOFactory.createDTOsFromList(bookmarks);
     }
 
     @Transactional
     public Optional<BookmarkDTO> getPendingBookmark() {
         logger.debug("Get pending bookmark");
-        List<Bookmark> bookmarks = bookmarkRepository.findByPending(true);
+
+        this.setUserFilter();
+
+        List<Bookmark> bookmarks = bookmarkRepository.findByPendingAndUserId(true, this.getCurrentUserName());
         if (bookmarks.size() == 0) {
             return Optional.empty();
         }
@@ -77,12 +79,11 @@ public class BookmarkService {
         logger.debug("Update bookmark");
 
         Bookmark bookmark = bookmarkRepository.findById(id).get();
-        //Category oldCategory = bookmark.getCategory();
 
         // May be updating with a new category in which case, add it
-        Optional<Category> category = categoryRepository.findByName(categoryName);
+        Optional<Category> category = categoryRepository.findByNameAndUserId(categoryName, bookmark.getUserId());
         if (!category.isPresent()) {
-            category = Optional.of(new Category(categoryName));
+            category = Optional.of(new Category(bookmark.getUserId(), categoryName));
         }
 
         // Update and save

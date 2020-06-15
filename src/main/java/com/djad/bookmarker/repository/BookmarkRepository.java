@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookmarkRepository extends CrudRepository<Bookmark, Long> {
-    Optional<Bookmark> findByName(String name);
-    Optional<Bookmark> findByUrl(String name);
-    List<Bookmark> findByPending(boolean pending);
+    Optional<Bookmark> findByUrlAndUserId(String name, String userId);
+    List<Bookmark> findByPendingAndUserId(boolean pending, String userId);
 }

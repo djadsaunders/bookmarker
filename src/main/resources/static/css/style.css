@@ -45,7 +45,6 @@ body {
 
 .help {
     float:right;
-    cursor: pointer;
 }
 
 .hide {
@@ -60,10 +59,20 @@ body {
     margin-right: 10px;
 }
 
-.help .badge {
-    font-size: 1em;
+.help i {
+    cursor: pointer;
 }
 
-.help i {
-    margin-left: 10px;
+button {
+    width: 75px;
+}
+
+.button-area {
+    margin-left: 20px;
+}
+
+.username-text {
+    margin-right: 1em;
+    display: inline-block;
+    vertical-align: top;
 }
