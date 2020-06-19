@@ -15,10 +15,17 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity
 @Table(name="category")
 @FilterDef(name="userFilter", parameters=@ParamDef(name="userId", type="string"))
 @Filter(name="userFilter", condition=":userId=userid")
+@NoArgsConstructor
+@EqualsAndHashCode
 public class Category {
 
     public static final String DEFAULT_NAME = "Unfiled";
@@ -26,80 +33,23 @@ public class Category {
     @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @EqualsAndHashCode.Exclude
+    @Getter private long id;
 
     @Column(name="userid")
-    private String userId;
+    @EqualsAndHashCode.Include
+    @Getter @Setter private String userId;
 
     @Column(name="name")
-    private String name;
+    @EqualsAndHashCode.Include
+    @Getter @Setter private String name;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<Bookmark> bookmarks;
-
-    public Category() {
-    }
+    @EqualsAndHashCode.Exclude
+    @Getter @Setter private List<Bookmark> bookmarks;
 
     public Category(String userId, String name) {
         this.userId = userId;
         this.name = name;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Bookmark> getBookmarks() {
-        return bookmarks;
-    }
-
-    public void setBookmarks(List<Bookmark> bookmarks) {
-        this.bookmarks = bookmarks;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Category other = (Category) obj;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
 }

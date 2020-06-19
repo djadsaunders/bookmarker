@@ -1,14 +1,10 @@
 package com.djad.bookmarker.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.transaction.Transactional;
 
 import com.djad.bookmarker.domain.Category;
-import com.djad.bookmarker.dto.BookmarkDTO;
-import com.djad.bookmarker.dto.BookmarkDTOFactory;
-import com.djad.bookmarker.dto.CategoryDTO;
 import com.djad.bookmarker.repository.CategoryRepository;
 
 import org.slf4j.Logger;
@@ -25,19 +21,12 @@ public class CategoryService extends AbstractService {
     private CategoryRepository categoryRepository;
 
     @Transactional
-    public List<CategoryDTO> getAllCategories() {
+    public List<Category> getAllCategories() {
         logger.debug("Get all categories");
 
         this.setUserFilter();
 
-        List<Category> categories = (List<Category>)categoryRepository.findAll();  
-        List<CategoryDTO> dtos = new ArrayList<>();
-        for (Category category : categories) {
-            List<BookmarkDTO> bookmarks = BookmarkDTOFactory.createDTOsFromList(category.getBookmarks());
-            dtos.add(new CategoryDTO(category.getId(), category.getName(), bookmarks));
-        }        
-       
-        return dtos;
+        return (List<Category>)categoryRepository.findAll();
     }
 
     @Transactional

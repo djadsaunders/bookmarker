@@ -3,6 +3,7 @@ package com.djad.bookmarker.webservice;
 import java.util.List;
 
 import com.djad.bookmarker.dto.BookmarkDTO;
+import com.djad.bookmarker.dto.BookmarkDTOFactory;
 import com.djad.bookmarker.service.BookmarkService;
 
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class BookmarkController {
     @GetMapping
     public List<BookmarkDTO> listBookmarks() {
         logger.debug("List bookmarks: user=" + this.getCurrentUserId());
-        return bookmarkService.getAllBookmarks();
+        return BookmarkDTOFactory.createDTOsFromList(bookmarkService.getAllBookmarks());
     }
 
     @DeleteMapping("/{id}")

@@ -29,13 +29,13 @@ public class BookmarkService extends AbstractService {
     private CategoryRepository categoryRepository;
 
     @Transactional
-    public BookmarkDTO createBookmark(String userId, String url, byte[] faviconBytes) {
+    public Bookmark createBookmark(String userId, String url, String faviconFile) {
         logger.debug("Create bookmark");
 
         // Look for bookmark first and return if already existing (based on URL)
         Optional<Bookmark> existingBookmark = bookmarkRepository.findByUrlAndUserId(url, userId);
         if (existingBookmark.isPresent()) {
-            return BookmarkDTOFactory.createDTO(existingBookmark.get());
+            return existingBookmark.get();
         }
 
         // Add to the default category, create if it doesn't exist
@@ -45,19 +45,18 @@ public class BookmarkService extends AbstractService {
         }
 
         Bookmark bookmark = bookmarkRepository.save(
-            new Bookmark(userId, defaultCategory.get(), url, null, true, faviconBytes));
+            new Bookmark(userId, defaultCategory.get(), url, faviconFile));
 
-        return BookmarkDTOFactory.createDTO(bookmark);
+        return bookmark;
     }
 
     @Transactional
-    public List<BookmarkDTO> getAllBookmarks() {
+    public List<Bookmark> getAllBookmarks() {
         logger.debug("Get all bookmarks");
 
         this.setUserFilter();
 
-        List<Bookmark> bookmarks = bookmarkRepository.findByPendingAndUserId(false, this.getCurrentUserName());
-        return BookmarkDTOFactory.createDTOsFromList(bookmarks);
+        return bookmarkRepository.findByPendingAndUserId(false, this.getCurrentUserName());
     }
 
     @Transactional
