@@ -28,9 +28,12 @@ public class BookmarkController {
 
     private BookmarkService bookmarkService;
 
+    private BookmarkDTOFactory bookmarkDTOFactory;
+
     @Autowired
-    public BookmarkController(BookmarkService bookmarkService) {
+    public BookmarkController(BookmarkService bookmarkService, BookmarkDTOFactory bookmarkDTOFactory) {
         this.bookmarkService = bookmarkService;
+        this.bookmarkDTOFactory = bookmarkDTOFactory;
     }
 
     @ModelAttribute("userId")
@@ -48,7 +51,7 @@ public class BookmarkController {
     @GetMapping
     public List<BookmarkDTO> listBookmarks() {
         logger.debug("List bookmarks: user=" + this.getCurrentUserId());
-        return BookmarkDTOFactory.createDTOsFromList(bookmarkService.getAllBookmarks());
+        return bookmarkDTOFactory.createDTOsFromList(bookmarkService.getAllBookmarks());
     }
 
     @DeleteMapping("/{id}")

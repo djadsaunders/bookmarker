@@ -5,33 +5,45 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.Cleanup;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class FaviconService {
 
     public static final String URL_PREFIX = "https://www.google.com/s2/favicons";
 
-    Logger logger = LoggerFactory.getLogger(FaviconService.class);
+    private FaviconStorageHandler faviconStorageHandler;
 
-    public byte[] getFaviconAsByteArray(String bookmarkUrl) {
+    @Autowired
+    public FaviconService(FaviconStorageHandler faviconStorageHandler) {
+        this.faviconStorageHandler = faviconStorageHandler;
+    }
 
-        logger.debug("Get favicon");
+    public String getAndStoreFavicon(String url) {
+        return faviconStorageHandler.writeFile(this.getFaviconAsByteArray(url));
+    }
 
-        String urlString = URL_PREFIX + "?domain=" + bookmarkUrl;
+    public byte[] readStoredFavicon(String faviconName) {
+        return faviconStorageHandler.readFile(faviconName);
+    }
+
+    public byte[] getFaviconAsByteArray(String urlString) {
+
+        log.debug("Get favicon");
+
+        urlString = URL_PREFIX + "?domain=" + urlString;
 
         byte[] result = null;
 
-        InputStream in = null;
-        ByteArrayOutputStream out = null;
-
         try {
             URL url = new URL(urlString);
-
-            in = new BufferedInputStream(url.openStream());
-            out = new ByteArrayOutputStream();
+            @Cleanup ByteArrayOutputStream out = new ByteArrayOutputStream();
+            @Cleanup InputStream in = new BufferedInputStream(url.openStream());
             byte[] buf = new byte[1024];
             int n = 0;
             while (-1!=(n=in.read(buf))) {
@@ -40,16 +52,8 @@ public class FaviconService {
             result = out.toByteArray();            
         } 
         catch (Exception e) {
-            logger.error(e.getMessage());
             // Leave icon empty on error
-        }
-        finally {
-            try {
-                out.close();
-                in.close();
-            }
-            catch (Exception e) {
-            }
+            log.error(e.getMessage());
         }
 
         return result;

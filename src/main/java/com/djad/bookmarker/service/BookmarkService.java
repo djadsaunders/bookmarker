@@ -28,6 +28,9 @@ public class BookmarkService extends AbstractService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired 
+    private BookmarkDTOFactory bookmarkDTOFactory;
+
     @Transactional
     public Bookmark createBookmark(String userId, String url, String faviconFile) {
         logger.debug("Create bookmark");
@@ -70,7 +73,7 @@ public class BookmarkService extends AbstractService {
             return Optional.empty();
         }
         
-        return Optional.of(BookmarkDTOFactory.createDTO(bookmarks.get(0)));
+        return Optional.of(bookmarkDTOFactory.createDTO(bookmarks.get(0)));
     }
 
     @Transactional

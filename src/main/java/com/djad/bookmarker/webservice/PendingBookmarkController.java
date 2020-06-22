@@ -2,12 +2,9 @@ package com.djad.bookmarker.webservice;
 
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.djad.bookmarker.dto.BookmarkDTO;
 import com.djad.bookmarker.service.BookmarkService;
 import com.djad.bookmarker.service.FaviconService;
-import com.djad.bookmarker.FileUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,13 +35,15 @@ public class PendingBookmarkController {
 
     @ModelAttribute("userId")
     public String getCurrentUserId() {
+        log.debug("Get current user ID");
         return bookmarkService.getCurrentUserName();
     }
     
     @GetMapping(value="/create")
-    public RedirectView createBookmark(@RequestParam("url") String url, HttpServletRequest request) {
-        String fileName = FileUtils.writeFaviconFile(faviconService.getFaviconAsByteArray(url));
-        bookmarkService.createBookmark(this.getCurrentUserId(), url, fileName);
+    public RedirectView createBookmark(@RequestParam("url") String url) {
+        log.debug("Create bookmark");
+        String faviconName = this.faviconService.getAndStoreFavicon(url);
+        bookmarkService.createBookmark(this.getCurrentUserId(), url, faviconName);
         return new RedirectView("/index.html");
     }
 

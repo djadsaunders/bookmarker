@@ -31,14 +31,17 @@ public class CategoryController {
 
     private CategoryService categoryService;
 
+    private BookmarkDTOFactory bookmarkDTOFactory;
+
     @ModelAttribute("userId")
     public String getCurrentUserId() {
         return categoryService.getCurrentUserName();
     }
     
     @Autowired
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, BookmarkDTOFactory bookmarkDTOFactory) {
         this.categoryService = categoryService;
+        this.bookmarkDTOFactory = bookmarkDTOFactory;
     }
 
     @PostMapping("/{id}")
@@ -54,7 +57,7 @@ public class CategoryController {
         List<Category> categories = categoryService.getAllCategories();  
         List<CategoryDTO> dtos = new ArrayList<>();
         for (Category category : categories) {
-            List<BookmarkDTO> bookmarks = BookmarkDTOFactory.createDTOsFromList(category.getBookmarks());
+            List<BookmarkDTO> bookmarks = bookmarkDTOFactory.createDTOsFromList(category.getBookmarks());
             dtos.add(new CategoryDTO(category.getId(), category.getName(), bookmarks));
         }        
 
