@@ -2,7 +2,6 @@ package com.djad.bookmarker.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;

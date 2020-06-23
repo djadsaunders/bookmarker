@@ -79,13 +79,13 @@
 				<div v-for="(category) in categories" class="category-area">
 					<span v-if="category.bookmarks.length > 0">
 						<div class="category-label" draggable="true" v-on:dragstart="drag" v-bind:id="'category.' + category.id">
-							<i class="fas fa-folder"></i>{{category.name}}
+							<i class="fas fa-folder"></i>{{category.name}} ({{category.bookmarks.length}})
 						</div>
 						<div v-for="(bookmark) in category.bookmarks">
-							<a v-bind:href="bookmark.url" class="bookmark-label" v-bind:title="bookmark.url"
+							<a v-bind:href="bookmark.url" target="_blank" class="bookmark-label" v-bind:title="bookmark.url"
 								draggable="true" v-on:dragstart="drag" v-bind:id="'bookmark.' + bookmark.id">
-								<span v-if="bookmark.favicon">
-									<img class="bookmark-icon" :src="'data:image/png;base64,' + bookmark.favicon" />
+								<span v-if="bookmark.faviconContents">
+									<img class="bookmark-icon" :src="'data:image/png;base64,' + bookmark.faviconContents" />
 								</span>
 								<span v-else>
 									<i class="fas fa-bookmark bookmark-icon"></i>

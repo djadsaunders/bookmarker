@@ -1,5 +1,6 @@
 package com.djad.bookmarker.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -51,5 +52,6 @@ public class Category {
     public Category(String userId, String name) {
         this.userId = userId;
         this.name = name;
+        this.bookmarks = new ArrayList<>();
     }
 }

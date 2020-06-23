@@ -10,5 +10,6 @@ public class BookmarkDTO {
     @Getter private long id;
     @Getter @Setter private String name;
     @Getter @Setter private String url;
-    @Getter @Setter private byte[] favicon;
+    @Getter @Setter private byte[] faviconContents;
+    @Getter @Setter private String faviconFile;
 }

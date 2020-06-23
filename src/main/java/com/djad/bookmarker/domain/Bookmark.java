@@ -49,10 +49,16 @@ public class Bookmark {
     @Column(name="faviconFile")
     @Getter @Setter private String faviconFile;
 
+    /**
+     * Create Bookmark with default name and pending flag.
+     */
     public Bookmark(String userId, Category category, String url, String faviconFile) {
         this(userId, category, url, null, true, faviconFile);
     }
 
+    /**
+     * Create Bookmark with all values.
+     */
     public Bookmark(String userId, Category category, String url, String name, boolean pending, 
         String faviconFile) {
 

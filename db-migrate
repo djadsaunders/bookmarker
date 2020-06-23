@@ -1,0 +1,2 @@
+#!/bin/bash
+flyway -url=jdbc:postgresql://localhost:5432/bookmarker -user=postgres -password=postgres -locations=filesystem:/home/dan/dev/bookmarker/src/sql migrate

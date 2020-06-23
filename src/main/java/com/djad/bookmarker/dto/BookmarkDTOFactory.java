@@ -29,13 +29,14 @@ public class BookmarkDTOFactory {
     }
     
     public BookmarkDTO createDTO(Bookmark bookmark) {
-        byte[] favicon = faviconStorageHandler.readFile(bookmark.getFaviconFile());
+        byte[] faviconContents = faviconStorageHandler.readFile(bookmark.getFaviconFile());
         return new BookmarkDTO(
             bookmark.getCategory().getName(), 
             bookmark.getId(), 
             bookmark.getName(), 
             bookmark.getUrl(),
-            favicon
+            faviconContents,
+            bookmark.getFaviconFile()
         );
     } 
 }
