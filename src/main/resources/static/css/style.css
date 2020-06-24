@@ -1,5 +1,6 @@
 body {
     background-color: #ddd;
+    font-family: "open_sansregular","Helvetica Neue",helvetica,arial,sans-serif;
 }
 
 .items-form > * {
@@ -18,8 +19,14 @@ body {
     margin-left: 20px;
 }
 
+.bookmark-text-area {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .top-bar i {
-    font-size: 1.5em;
+    font-size: 1.4em;
     margin-right: 5px;
 }
 
@@ -37,6 +44,11 @@ body {
 .no-bookmarks {
     font-style: italic;
     color: #777;
+}
+
+.category-area {
+    padding: 10px 20px 20px 15px;
+    margin:10px;
 }
 
 .category-area * {

@@ -1,6 +1,7 @@
 package com.djad.bookmarker.service;
 
-import com.djad.bookmarker.domain.Bookmark;
+import java.util.Optional;
+
 import com.djad.bookmarker.domain.Category;
 import com.djad.bookmarker.repository.CategoryRepository;
 
@@ -13,30 +14,17 @@ public class BootstrapService {
     @Autowired
     public CategoryRepository categoryRepository;
 
-    @Autowired
-    public FaviconService faviconService;
-
     public void seedData() {
-        categoryRepository.save(new Category("dan", Category.DEFAULT_NAME));
-        categoryRepository.save(new Category("ali", Category.DEFAULT_NAME));
-        createDefaultBookmarks("dan");
-        createDefaultBookmarks("ali");
-    }
 
-    private void createDefaultBookmarks(String user) {
-        Category catShopping = new Category(user, "Shopping");
-        Category catServices = new Category(user, "Services");
+        // Add default categories
+        Optional<Category> cat1 = categoryRepository.findByNameAndUserId(Category.DEFAULT_NAME, "dan");
+        Optional<Category> cat2 = categoryRepository.findByNameAndUserId(Category.DEFAULT_NAME, "ali");
 
-        createBookmark(user, catShopping, "https://www.amazon.co.uk/", "Amazon");
-        createBookmark(user, catServices, "https://mail.google.com/mail/u/0/#inbox", "GMail");
-        
-        categoryRepository.save(catShopping);
-        categoryRepository.save(catServices);
-    }
-
-    private void createBookmark(String user, Category category, String url, String name) {
-        Bookmark bookmark = 
-            new Bookmark(user, category, url, name, false, faviconService.getAndStoreFavicon(url));
-        category.getBookmarks().add(bookmark);
+        if (!cat1.isPresent()) {
+            categoryRepository.save(new Category("dan", Category.DEFAULT_NAME));
+        }
+        if (!cat2.isPresent()) {
+            categoryRepository.save(new Category("ali", Category.DEFAULT_NAME));
+        }
     }
 }

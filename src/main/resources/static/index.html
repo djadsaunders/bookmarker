@@ -10,10 +10,16 @@
 		<script src="/javascript/bootstrap.min.js"></script>
 		<script src="/javascript/vue.js"></script>
 		<link rel="stylesheet" href="/css/bootstrap.min.css" />
+		
+		<!-- FontAwesome -->
 		<link rel="stylesheet" href="/css/all.css" />
 
 		<!-- Custom CSS -->
 		<link rel="stylesheet" href="/css/style.css" />
+
+		<!-- Custom fonts -->
+		<link rel="stylesheet" href="/css/opensans/opensans_regular_macroman/stylesheet.css" />
+
 	</head>
 
 	<body>
@@ -76,12 +82,17 @@
 			<!-- Main panel showing bookmarks -->
 
 			<div class="main-div">
-				<div v-for="(category) in categories" class="category-area">
-					<span v-if="category.bookmarks.length > 0">
+
+				<!-- row -->
+				<div class="row">
+				
+					<!-- category -->
+					<div v-for="(category) in categories" v-if="category.bookmarks.length > 0" class="category-area col-3">
+					
 						<div class="category-label" draggable="true" v-on:dragstart="drag" v-bind:id="'category.' + category.id">
-							<i class="fas fa-folder"></i>{{category.name}} ({{category.bookmarks.length}})
+							<i class="fas fa-folder"></i>{{category.name}}
 						</div>
-						<div v-for="(bookmark) in category.bookmarks">
+						<div v-for="(bookmark) in category.bookmarks" class="bookmark-text-area">
 							<a v-bind:href="bookmark.url" target="_blank" class="bookmark-label" v-bind:title="bookmark.url"
 								draggable="true" v-on:dragstart="drag" v-bind:id="'bookmark.' + bookmark.id">
 								<span v-if="bookmark.faviconContents">
@@ -93,8 +104,11 @@
 								{{bookmark.name}}
 							</a>
 						</div>
-					</span>
-				</div>
+
+					</div> <!-- end category -->
+
+				</div> <!-- end row -->
+
 			</div>
 
 		</div>
