@@ -1,5 +1,6 @@
 package com.djad.bookmarker;
 
+import com.djad.bookmarker.service.DBStorageFaviconHandler;
 import com.djad.bookmarker.service.FaviconStorageHandler;
 import com.djad.bookmarker.service.LocalStorageFaviconHandler;
 import com.djad.bookmarker.service.S3StorageFaviconHandler;
@@ -32,6 +33,11 @@ public class BookmarkerApplicationContext {
             case "S3": {
                 log.debug("Creating AWS S3 favicon handler");
                 handler = new S3StorageFaviconHandler();
+                break;
+            }
+            case "DB": {
+                log.debug("Creating DB favicon handler");
+                handler = new DBStorageFaviconHandler();
                 break;
             }
             default: {

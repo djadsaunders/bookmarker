@@ -80,6 +80,8 @@
 				<artifactId>flyway-maven-plugin</artifactId>
 				<configuration>
 					<url>${env.JDBC_DATABASE_URL}</url>
+					<user>postgres</user>
+					<password>postgres</password>
 					<locations>filesystem:src/sql</locations>
 				</configuration>
 			</plugin>

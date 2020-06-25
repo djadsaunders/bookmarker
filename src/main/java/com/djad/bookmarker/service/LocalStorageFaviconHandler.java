@@ -1,13 +1,10 @@
 package com.djad.bookmarker.service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.djad.bookmarker.util.FileUtils;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -16,22 +13,22 @@ public class LocalStorageFaviconHandler extends AbstractFaviconStorageHandler {
 
     private static final String FAVICON_FOLDER = "/opt/bookmarker/thumbs/";
 
+    @Autowired
+    private FileUtils fileUtils;
+
     @Override
     public String writeFile(byte[] faviconImage) {
         log.debug("Called writeFile()");
         
-        String fileName = getRandomFilename();
-        File file = new File(FAVICON_FOLDER + fileName);
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+        String fileName = this.getRandomFilename();
 
-            @Cleanup FileOutputStream fos = new FileOutputStream(file);
-            fos.write(faviconImage);
+        try {
+            String filePath = FAVICON_FOLDER + fileName;
+            fileUtils.writeFile(filePath, faviconImage);
         }
-        catch (IOException e) {
-            log.error("Failed to write favicon file: " + e.getMessage());
+        catch (Exception e) {
+            fileName = null;
+            log.error("Failed to write favicon: " + e.getMessage());
         }
 
         return fileName;
@@ -41,15 +38,13 @@ public class LocalStorageFaviconHandler extends AbstractFaviconStorageHandler {
     public byte[] readFile(String fileName) {
         log.debug("Called readFile()");
 
-        File file = new File(FAVICON_FOLDER + fileName);
-        byte[] result = new byte[(int)file.length()];
+        byte[] result = null;
 
         try {
-            @Cleanup FileInputStream fis = new FileInputStream(file);
-            fis.read(result);
+            result = fileUtils.readFileAsByteArray(FAVICON_FOLDER + fileName);
         }
-        catch (IOException e) {
-            log.error("Failed to write favicon file: " + e.getMessage());
+        catch (Exception e) {
+            log.error("Failed to read favicon: " + e.getMessage());
         }
 
         return result;

@@ -25,6 +25,7 @@ public class FaviconService {
     }
 
     public String getAndStoreFavicon(String url) {
+        // FIXME should not store file name if getting the favicon failed
         return faviconStorageHandler.writeFile(this.getFaviconAsByteArray(url));
     }
 
